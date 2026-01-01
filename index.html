@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今晚吃什麼？- 豪華美化版</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        orange: { 50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c' },
+                        slate: { 800: '#1e293b', 600: '#475569', 500: '#64748b' }
+                    },
+                    boxShadow: {
+                        'xl-orange': '0 20px 25px -5px rgba(249, 115, 22, 0.1), 0 10px 10px -5px rgba(249, 115, 22, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* 美化按鈕樣式 */
+        .choice-btn {
+            @apply w-full p-5 flex items-center text-left bg-white border-2 border-orange-100 rounded-2xl shadow-sm mb-4 transition-all duration-200;
+        }
+        .choice-btn:hover { @apply border-orange-400 bg-orange-50 shadow-md -translate-y-0.5; }
+        .choice-btn:active { @apply scale-[0.98] bg-orange-100 border-orange-500; }
+        .btn-icon { @apply text-3xl mr-4 filter drop-shadow-sm; }
+        .btn-text { @apply flex flex-col; }
+        .btn-title { @apply text-lg font-bold text-slate-800; }
+        .btn-desc { @apply text-sm text-slate-500 font-medium; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#FFF5F0] flex flex-col items-center justify-center p-6">
+
+    <main id="app-container" class="w-full max-w-md relative">
+        <div class="absolute -top-20 -left-20 w-40 h-40 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+
+        <div class="bg-white/80 backdrop-blur-lg rounded-[2.5rem] shadow-xl-orange p-8 relative z-10 border border-white/50">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-black text-orange-600 mb-2 tracking-tight">今晚吃什麼？</h1>
+                <p class="text-slate-600 font-medium">不再糾結，三題決定你的晚餐</p>
+            </header>
+
+            <div id="progress-bar" class="flex justify-between mb-8 px-2">
+                <div class="h-2 w-full bg-orange-100 rounded-full overflow-hidden">
+                    <div id="progress" class="h-full bg-orange-500 rounded-full transition-all duration-500 ease-out" style="width: 33%"></div>
+                </div>
+                <div class="text-xs font-bold text-orange-500 ml-3 tracking-wider">STEP <span id="step-num">1</span>/3</div>
+            </div>
+        
+            <div id="q1" class="quiz-step fade-in">
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center"><span class="mr-2">💰</span> 預算與飢餓度？</h2>
+                <button onclick="nextStep('q1', 'q2', '平價 小吃', 2)" class="choice-btn group">
+                    <span class="btn-icon group-hover:scale-110 transition-transform">🍜</span>
+                    <div class="btn-text">
+                        <span class="btn-title">便宜解決</span>
+                        <span class="btn-desc">平價 / 銅板美食 / 小吃</span>
+                    </div>
+                </button>
+                <button onclick="nextStep('q1', 'q2', '熱門 餐廳', 2)" class="choice-btn group">
+                    <span class="btn-icon group-hover:scale-110 transition-transform">🍱</span>
+                    <div class="btn-text">
+                        <span class="btn-title">正常價位</span>
+                        <span class="btn-desc">人氣餐廳 / 簡餐 / 定食</span>
+                    </div>
+                </button>
+                <button onclick="nextStep('q1', 'q2', '大餐 慶祝', 2)" class="choice-btn group">
+                    <span class="btn-icon group-hover:scale-110 transition-transform">🥩</span>
+                    <div class="btn-text">
+                        <span class="btn-title">想吃大餐</span>
+                        <span class="btn-desc">高檔 / 慶祝 / 吃到飽</span>
+                    </div>
+                </button>
+            </div>
+
+            <div id="q2" class="quiz-step hidden">
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center"><span class="mr-2">🏠</span> 想在哪裡吃？</h2>
+                <button onclick="nextStep('q2', 'q3', '', 3)" class="choice-btn group">
+                    <span class="btn-icon group-hover:scale-110 transition-transform">🪑</span>
+                    <div class="btn-text">
+                        <span class="btn-title">坐在店裡吃</span>
+                        <span class="btn-desc">享受店內氣氛與服務</span>
+                    </div>
+                </button>
+                <button onclick="nextStep('q2', 'q3', '外帶 自取', 3)" class="choice-btn group">
+                    <span class="btn-icon group-hover:scale-110 transition-transform">🥡</span>
+                    <div class="btn-text">
+                        <span class="btn-title">買回家耍廢</span>
+                        <span class="btn-desc">外帶自取 / 便當 / 速食</span>
+                    </div>
+                </button>
+            </div>
+
+            <div id="q3" class="quiz-step hidden text-center py-4">
+                <div class="text-6xl mb-6 animate-bounce drop-shadow-md">🗺️</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-4">準備好出發了嗎？</h2>
+                <p class="text-slate-600 mb-8 leading-relaxed font-medium">我們將根據您的選擇與定位，<br>在 Google Maps 為您找出最佳選擇！</p>
+                
+                <button onclick="openGoogleMaps()" class="w-full p-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-black text-xl shadow-xl-orange hover:shadow-orange-500/40 hover:-translate-y-1 active:scale-[0.98] transition-all flex items-center justify-center">
+                    <span class="mr-2">🚀</span> 顯示推薦餐廳
+                </button>
+                <p class="text-xs text-slate-400 mt-6 font-medium">將開啟 Google Maps 應用程式或網頁</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let queryParts = [];
+        let userLocation = null;
+
+        // 取得定位
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                userLocation = `${pos.coords.latitude},${pos.coords.longitude}`;
+            });
+        }
+
+        function nextStep(current, next, val, stepNum) {
+            if(val) queryParts.push(val);
+            
+            // 切換頁面動畫
+            const currentEl = document.getElementById(current);
+            currentEl.classList.remove('fade-in');
+            currentEl.style.opacity = 0;
+            
+            setTimeout(() => {
+                currentEl.classList.add('hidden');
+                const nextEl = document.getElementById(next);
+                nextEl.classList.remove('hidden');
+                nextEl.classList.add('fade-in');
+                
+                // 更新進度條
+                document.getElementById('progress').style.width = `${(stepNum / 3) * 100}%`;
+                document.getElementById('step-num').innerText = stepNum;
+            }, 200); // 等待動畫結束
+        }
+
+        function openGoogleMaps() {
+            // 組合搜尋詞
+            const finalQuery = encodeURIComponent(queryParts.join(' ') + ' 餐廳 營業中');
+            
+            let url;
+            if (userLocation) {
+                // 有定位：使用精準搜尋
+                url = `https://www.google.com/maps/search/${finalQuery}/@${userLocation},15z`;
+            } else {
+                // 沒定位：搜尋附近
+                url = `https://www.google.com/maps/search/${finalQuery}/`;
+            }
+            
+            // 開啟新分頁
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
