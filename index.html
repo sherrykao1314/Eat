@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今晚吃什麼？- 專屬晚餐決策器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card-hover:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-6">
+
+    <header class="text-center my-8">
+        <h1 class="text-4xl font-black text-orange-500 mb-2">今晚吃什麼？</h1>
+        <p class="text-slate-500">不再糾結，三題決定你的晚餐</p>
+    </header>
+
+    <main id="app-container" class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 min-h-[400px] flex flex-col justify-center relative overflow-hidden">
+        
+        <div id="q1" class="quiz-step fade-in">
+            <span class="text-orange-500 font-bold mb-2 block">STEP 01</span>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">現在的飢餓程度？</h2>
+            <div class="space-y-4">
+                <button onclick="nextStep('q1', 'q2', {price: 1})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🍜 只是填個肚子 (平價)</button>
+                <button onclick="nextStep('q1', 'q2', {price: 2})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🍱 正常食量 (中價位)</button>
+                <button onclick="nextStep('q1', 'q2', {price: 4})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🥩 想要大吃一頓 (高價位)</button>
+            </div>
+        </div>
+
+        <div id="q2" class="quiz-step hidden fade-in">
+            <span class="text-orange-500 font-bold mb-2 block">STEP 02</span>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">想在哪裡吃？</h2>
+            <div class="space-y-4">
+                <button onclick="nextStep('q2', 'q3', {type: 'restaurant'})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🪑 輕鬆坐著吃 (在地小吃)</button>
+                <button onclick="nextStep('q2', 'q3', {type: 'cafe'})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">✨ 質感好拍照 (網美店/餐廳)</button>
+                <button onclick="nextStep('q2', 'q3', {type: 'meal_takeaway'})" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🏠 買回家裡耍廢吃 (外帶/便當)</button>
+            </div>
+        </div>
+
+        <div id="q3" class="quiz-step hidden fade-in">
+            <span class="text-orange-500 font-bold mb-2 block">STEP 03</span>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">移動距離限制？</h2>
+            <div class="space-y-4">
+                <button onclick="finishQuiz(800)" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🚶 走幾步路就到 (800m)</button>
+                <button onclick="finishQuiz(3000)" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🛵 騎車可以接受 (3km)</button>
+                <button onclick="finishQuiz(10000)" class="w-full p-5 text-left border-2 border-slate-100 rounded-2xl hover:border-orange-400 hover:bg-orange-50 card-hover transition-all font-medium text-slate-700">🚗 為了美食可以遠征 (10km)</button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden text-center fade-in">
+            <div class="animate-bounce mb-4 text-5xl">🥙</div>
+            <p class="text-slate-600 font-bold">正在挑選最適合你的三間店...</p>
+        </div>
+
+        <div id="result-area" class="hidden fade-in">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4 text-center">為你推薦！</h2>
+            <div id="restaurant-list" class="space-y-4 max-h-[400px] overflow-y-auto">
+                </div>
+            <button onclick="location.reload()" class="w-full mt-6 bg-slate-800 text-white p-4 rounded-2xl font-bold shadow-lg hover:bg-slate-700 active:scale-95 transition-all">重新選擇</button>
+        </div>
+    </main>
+
+    <footer class="mt-8 text-slate-400 text-sm">Powered by Google Places API</footer>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBP_rldHF5AUcq1LfSh27UPYiblPWISLow&libraries=places"></script>
+
+    <script>
+        let answers = {};
+        let userLocation = null;
+
+        // 初始化取得定位
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                },
+                () => alert("請開啟定位權限，否則我找不到附近的餐廳喔！")
+            );
+        }
+
+        function nextStep(current, next, data) {
+            answers = { ...answers, ...data };
+            document.getElementById(current).classList.add('hidden');
+            document.getElementById(next).classList.remove('hidden');
+        }
+
+        function finishQuiz(radius) {
+            answers.radius = radius;
+            document.getElementById('q3').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            
+            if (!userLocation) {
+                alert("尚未取得定位，請稍等或刷新網頁");
+                return;
+            }
+            fetchRestaurants();
+        }
+
+        function fetchRestaurants() {
+            const service = new google.maps.places.PlacesService(document.createElement('div'));
+            const request = {
+                location: userLocation,
+                radius: answers.radius,
+                type: [answers.type],
+                maxPriceLevel: answers.price,
+                openNow: true
+            };
+
+            service.nearbySearch(request, (results, status) => {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('result-area').classList.remove('hidden');
+
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    // 隨機選出 3 間 (若不足 3 間則全顯示)
+                    const shuffled = results.sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, 3);
+                    renderCards(selected);
+                } else {
+                    document.getElementById('restaurant-list').innerHTML = `
+                        <div class="text-center py-10 text-slate-400">
+                            <p>附近的範圍找不到符合條件的店...</p>
+                            <p class="text-xs">試試看放寬預算或距離？</p>
+                        </div>`;
+                }
+            });
+        }
+
+        function renderCards(places) {
+            const list = document.getElementById('restaurant-list');
+            list.innerHTML = places.map(place => {
+                const photoUrl = place.photos 
+                    ? place.photos[0].getUrl({maxWidth: 400, maxHeight: 300}) 
+                    : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80';
+                
+                // 建立導航連結
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${place.place_id}`;
+
+                return `
+                    <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                        <div class="h-32 bg-cover bg-center" style="background-image: url('${photoUrl}')"></div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-slate-800 text-lg leading-tight">${place.name}</h3>
+                                <span class="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full font-bold">⭐ ${place.rating || 'N/A'}</span>
+                            </div>
+                            <p class="text-slate-500 text-xs mb-3">${place.vicinity}</p>
+                            <a href="${mapUrl}" target="_blank" class="block text-center bg-white border-2 border-orange-400 text-orange-500 py-2 rounded-xl text-sm font-bold hover:bg-orange-400 hover:text-white transition-colors">
+                                帶路前往
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
