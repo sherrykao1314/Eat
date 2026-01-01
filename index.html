@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今晚吃什麼？- Google 智慧搜尋版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff5f0; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .choice-btn { @apply w-full p-5 text-left border-2 border-orange-100 rounded-2xl hover:border-orange-500 hover:bg-orange-50 transition-all font-bold text-slate-700 bg-white shadow-sm mb-4; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+    <header class="text-center my-10">
+        <h1 class="text-4xl font-black text-orange-600 mb-2">今晚吃什麼？</h1>
+        <p class="text-orange-400">使用 Google Maps 真實數據，不再踩雷</p>
+    </header>
+
+    <main id="app-container" class="w-full max-w-md">
+        
+        <div id="q1" class="quiz-step fade-in">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">💰 預算與飢餓度？</h2>
+            <button onclick="nextStep('q1', 'q2', '平價 小吃')" class="choice-btn">🍜 便宜解決 (平價/小吃)</button>
+            <button onclick="nextStep('q1', 'q2', '熱門 餐廳')" class="choice-btn">🍱 正常價位 (人氣餐廳)</button>
+            <button onclick="nextStep('q1', 'q2', '大餐 慶祝')" class="choice-btn">🥩 想吃大餐 (高檔/慶祝)</button>
+        </div>
+
+        <div id="q2" class="quiz-step hidden fade-in">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">🏠 想在哪裡吃？</h2>
+            <button onclick="nextStep('q2', 'q3', '')" class="choice-btn">🪑 坐在店裡吃</button>
+            <button onclick="nextStep('q2', 'q3', '外帶 自取')" class="choice-btn">🥡 買回家裡耍廢 (外帶)</button>
+            <button onclick="nextStep('q2', 'q3', '外送')" class="choice-btn">🛵 懶得動 (外送平台)</button>
+        </div>
+
+        <div id="q3" class="quiz-step hidden fade-in text-center">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">📍 準備好看看結果了嗎？</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-inner mb-8 border-2 border-dashed border-orange-200">
+                <p class="text-slate-500 italic">我們將根據您的定位，<br>在 Google Maps 找出評分最高的選擇</p>
+            </div>
+            <button onclick="openGoogleMaps()" class="w-full p-6 bg-orange-500 text-white rounded-2xl font-black text-xl shadow-lg hover:bg-orange-600 transition-all">
+                🔍 顯示推薦餐廳
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        let queryParts = [];
+        let userLocation = null;
+
+        // 取得定位（非必填，但有定位更準）
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                userLocation = `${pos.coords.latitude},${pos.coords.longitude}`;
+            });
+        }
+
+        function nextStep(current, next, val) {
+            if(val) queryParts.push(val);
+            document.getElementById(current).classList.add('hidden');
+            document.getElementById(next).classList.remove('hidden');
+        }
+
+        function openGoogleMaps() {
+            // 組合搜尋詞，例如 "平價 小吃 外帶 餐廳"
+            const finalQuery = encodeURIComponent(queryParts.join(' ') + ' 餐廳 營業中');
+            
+            let url;
+            if (userLocation) {
+                // 如果有定位，使用精準搜尋
+                url = `https://www.google.com/maps/search/${finalQuery}/@${userLocation},15z`;
+            } else {
+                // 沒定位則搜尋附近
+                url = `https://www.google.com/maps/search/${finalQuery}/`;
+            }
+            
+            // 直接開啟新分頁
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
